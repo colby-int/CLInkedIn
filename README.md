@@ -7,10 +7,8 @@
 CLInkedIn is a self-hosted LinkedIn jobs scanner with two frontends backed by the same API:
 - a web dashboard,
 - a colorful terminal dashboard (TUI/CLI).
-- 
-Includes hourly auto-scanning, and a unified feed from parallel keyword/location targets.
 
-## Screenshots
+Includes hourly auto-scanning, and a unified feed from parallel keyword/location targets.
 
 <p align="center">
   <img src="./docs/screenshots/web.png" alt="Web Interface" width="720" />
@@ -75,7 +73,14 @@ Open web UI:
 docker compose --profile cli run --rm linkedin-job-cli
 ```
 
+or just use 
+
+```bash
+./run.sh cli
+```
+
 CLI keys:
+- `esc` escape search
 - `r` run scan
 - `f` cycle feed filter (`recent` / `all` / `starred`)
 - `s` star/unstar selected row
