@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CLInked in</title>
+    <link rel="icon" type="image/png" href="/static/logo.png" />
+    <style>
+      :root {
+        --bg: #f5f7fa;
+        --panel: #ffffff;
+        --line: #d6dfe8;
+        --text: #172232;
+        --muted: #5f7084;
+        --accent: #146c60;
+        --accent-soft: #ddf5f1;
+        --warn: #8a2d2d;
+        --star: #f4a400;
+        --row-starred: #fff7e4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "IBM Plex Sans", "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 8% 12%, #eaf8f5 0%, transparent 28%),
+          radial-gradient(circle at 90% 5%, #fff1dd 0%, transparent 30%),
+          var(--bg);
+      }
+
+      .page {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+
+      .top {
+        background: linear-gradient(140deg, #ffffff 0%, #f7fcff 100%);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 0.95rem;
+        box-shadow: 0 12px 26px rgba(21, 34, 50, 0.08);
+      }
+
+      .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .brand img {
+        display: block;
+        width: auto;
+        height: clamp(32px, 5.4vw, 56px);
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .status {
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      .toolbar {
+        margin-top: 0.8rem;
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 0.55rem;
+      }
+
+      .search {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 0.7rem 0.82rem;
+        font-size: 0.98rem;
+        outline: none;
+      }
+
+      .search:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(20, 108, 96, 0.15);
+      }
+
+      .button {
+        border: 0;
+        border-radius: 10px;
+        background: var(--accent);
+        color: #fff;
+        font-size: 0.92rem;
+        font-weight: 600;
+        padding: 0.68rem 0.85rem;
+        cursor: pointer;
+      }
+
+      .button.secondary {
+        background: #24364f;
+      }
+
+      .button:disabled {
+        opacity: 0.72;
+        cursor: wait;
+      }
+
+      .chips {
+        margin-top: 0.65rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--muted);
+        padding: 0.42rem 0.72rem;
+        font-size: 0.84rem;
+        cursor: pointer;
+      }
+
+      .chip.active {
+        background: var(--accent-soft);
+        border-color: #99d5cb;
+        color: #0c5a4f;
+      }
+
+      .meta {
+        margin-top: 0.6rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: var(--muted);
+        gap: 0.6rem;
+      }
+
+      .error {
+        color: var(--warn);
+        font-weight: 600;
+      }
+
+      .table-wrap {
+        margin-top: 0.9rem;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--panel);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        background: #f0f5fa;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 0.58rem 0.55rem;
+        border-bottom: 1px solid #e8edf2;
+        vertical-align: middle;
+        font-size: 0.88rem;
+      }
+
+      th {
+        color: #4c5e72;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      tbody tr:hover {
+        background: #fbfdff;
+      }
+
+      tbody tr.starred {
+        background: var(--row-starred);
+      }
+
+      .star {
+        width: 30px;
+        height: 30px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 0.98rem;
+        line-height: 1;
+      }
+
+      .star.on {
+        color: var(--star);
+        border-color: #f1cf78;
+        background: #fff6df;
+      }
+
+      .logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #dbe4ec;
+        background: #fff;
+        overflow: hidden;
+      }
+
+      .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .logo.fallback {
+        background: #ecf2f7;
+        color: #5d7085;
+        font-size: 0.7rem;
+        font-weight: 700;
+      }
+
+      .title {
+        font-weight: 600;
+        max-width: 320px;
+      }
+
+      .source {
+        color: #4d6279;
+        font-size: 0.78rem;
+        white-space: nowrap;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.3rem;
+        align-items: center;
+      }
+
+      .icon-btn,
+      .open-link {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        cursor: pointer;
+        color: #213248;
+        text-decoration: none;
+      }
+
+      .icon-btn:hover,
+      .open-link:hover {
+        border-color: #9cb2c8;
+        background: #f7fbff;
+      }
+
+      .empty {
+        padding: 1rem;
+        text-align: center;
+        color: var(--muted);
+      }
+
+      .drawer {
+        margin-top: 0.9rem;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 240ms ease;
+      }
+
+      .drawer.open {
+        max-height: 1400px;
+      }
+
+      .drawer-inner {
+        padding: 0.9rem;
+        display: grid;
+        gap: 0.9rem;
+      }
+
+      .panel-title {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(140px, 1fr));
+        gap: 0.5rem;
+      }
+
+      .field {
+        display: grid;
+        gap: 0.28rem;
+      }
+
+      .field label {
+        font-size: 0.76rem;
+        color: #586a7f;
+      }
+
+      .field input,
+      .field select {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0.46rem 0.52rem;
+        font-size: 0.84rem;
+      }
+
+      .targets {
+        border: 1px solid #e4ebf2;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .target-row {
+        display: grid;
+        grid-template-columns: 110px 1fr 1fr 95px 90px 38px;
+        gap: 0.4rem;
+        align-items: center;
+        padding: 0.45rem;
+        border-bottom: 1px solid #edf2f6;
+      }
+
+      .target-row:last-child {
+        border-bottom: 0;
+      }
+
+      .target-row input[type="text"],
+      .target-row input[type="number"] {
+        width: 100%;
+      }
+
+      .target-row input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+      }
+
+      .inline-actions {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+
+      .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.38rem;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: #f2f6fb;
+        border: 1px solid #dbe5ef;
+        border-radius: 999px;
+        padding: 0.22rem 0.52rem;
+        font-size: 0.76rem;
+        color: #495e76;
+      }
+
+      .tag button {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        color: #71859c;
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      @media (max-width: 980px) {
+        .toolbar {
+          grid-template-columns: 1fr;
+        }
+
+        .table-wrap {
+          overflow-x: auto;
+        }
+
+        .target-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="top">
+        <div class="top-row">
+          <div class="brand">
+            <img src="/static/logo.png" alt="CLInked in" />
+            <span class="sr-only">CLInked in</span>
+          </div>
+          <div class="status" id="statusText">Loading...</div>
+        </div>
+
+        <div class="toolbar">
+          <input id="searchInput" class="search" type="search" placeholder="Search title, company, or location" />
+          <button id="scanButton" class="button" type="button">Run scan</button>
+          <button id="configButton" class="button secondary" type="button">Config editor</button>
+        </div>
+
+        <div class="chips" id="filterChips">
+          <button type="button" class="chip active" data-filter="recent">Last 3 days</button>
+          <button type="button" class="chip" data-filter="all">Show all</button>
+          <button type="button" class="chip" data-filter="starred">Starred</button>
+        </div>
+
+        <div class="meta">
+          <span id="updatedText">Last updated: --</span>
+          <span id="errorText" class="error" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <section id="configDrawer" class="drawer" aria-hidden="true">
+        <div class="drawer-inner">
+          <h2 class="panel-title">Scanner Configuration</h2>
+          <div class="grid">
+            <div class="field">
+              <label for="parallelInput">Max parallel scans</label>
+              <input id="parallelInput" type="number" min="1" max="10" />
+            </div>
+            <div class="field">
+              <label for="groqEnabledInput">Groq keyword refinement</label>
+              <select id="groqEnabledInput">
+                <option value="true">Enabled</option>
+                <option value="false">Disabled</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="groqExpansionInput">Groq expansions / target</label>
+              <input id="groqExpansionInput" type="number" min="0" max="8" />
+            </div>
+          </div>
+
+          <div>
+            <h3 class="panel-title">Parallel Scan Targets</h3>
+            <div class="muted">Each enabled target runs as part of the unified feed.</div>
+            <div id="targetRows" class="targets"></div>
+            <div class="inline-actions" style="margin-top:0.55rem">
+              <button id="addTargetButton" class="button" type="button">Add target</button>
+              <button id="saveConfigButton" class="button secondary" type="button">Save config</button>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="panel-title">Exclusions</h3>
+            <div class="inline-actions" style="margin-bottom:0.45rem">
+              <input id="excludeCompanyInput" class="search" type="text" placeholder="Exclude company" style="max-width:320px" />
+              <button id="addCompanyExclusionButton" class="button" type="button">Add company exclusion</button>
+            </div>
+            <div id="excludedCompanies" class="tag-list"></div>
+
+            <div class="inline-actions" style="margin:0.6rem 0 0.45rem">
+              <input id="excludeJobInput" class="search" type="text" placeholder="Exclude job URL" style="max-width:460px" />
+              <button id="addJobExclusionButton" class="button" type="button">Add job exclusion</button>
+            </div>
+            <div id="excludedJobs" class="tag-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Star</th>
+              <th>Logo</th>
+              <th>Role</th>
+              <th>Company</th>
+              <th>Location</th>
+              <th>Posted</th>
+              <th>Source</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="jobRows"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script>
+      const state = {
+        filter: "recent",
+        search: "",
+        jobs: [],
+        appState: null,
+        config: null,
+        configDrawerOpen: false,
+        nextRunAtMs: null,
+        intervalMinutes: 60,
+      };
+
+      const els = {
+        statusText: document.getElementById("statusText"),
+        updatedText: document.getElementById("updatedText"),
+        errorText: document.getElementById("errorText"),
+        searchInput: document.getElementById("searchInput"),
+        scanButton: document.getElementById("scanButton"),
+        configButton: document.getElementById("configButton"),
+        filterChips: document.getElementById("filterChips"),
+        jobRows: document.getElementById("jobRows"),
+        configDrawer: document.getElementById("configDrawer"),
+        parallelInput: document.getElementById("parallelInput"),
+        groqEnabledInput: document.getElementById("groqEnabledInput"),
+        groqExpansionInput: document.getElementById("groqExpansionInput"),
+        targetRows: document.getElementById("targetRows"),
+        addTargetButton: document.getElementById("addTargetButton"),
+        saveConfigButton: document.getElementById("saveConfigButton"),
+        excludedCompanies: document.getElementById("excludedCompanies"),
+        excludedJobs: document.getElementById("excludedJobs"),
+        excludeCompanyInput: document.getElementById("excludeCompanyInput"),
+        excludeJobInput: document.getElementById("excludeJobInput"),
+        addCompanyExclusionButton: document.getElementById("addCompanyExclusionButton"),
+        addJobExclusionButton: document.getElementById("addJobExclusionButton"),
+      };
+
+      function apiUrl(path, params = {}) {
+        const url = new URL(path, window.location.origin);
+        Object.entries(params).forEach(([key, value]) => {
+          if (value === undefined || value === null || value === "") return;
+          url.searchParams.set(key, String(value));
+        });
+        return url.toString();
+      }
+
+      async function apiFetch(path, options = {}) {
+        const response = await fetch(path, {
+          headers: { "Content-Type": "application/json" },
+          ...options,
+        });
+
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          throw new Error(payload.detail || "Request failed");
+        }
+
+        return response.json().catch(() => ({}));
+      }
+
+      function debounce(fn, wait = 160) {
+        let timeout;
+        return (...args) => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => fn(...args), wait);
+        };
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function formatDate(isoString) {
+        if (!isoString) return "--";
+        const date = new Date(isoString);
+        return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+      }
+
+      function formatCountdown(ms) {
+        if (!Number.isFinite(ms)) return "--";
+        if (ms <= 0) return "refreshing soon";
+        const totalSeconds = Math.floor(ms / 1000);
+        const min = Math.floor(totalSeconds / 60);
+        const sec = totalSeconds % 60;
+        return `${min}m ${String(sec).padStart(2, "0")}s`;
+      }
+
+      function logoCell(job) {
+        if (job.logo && job.logo.url) {
+          return `<span class="logo"><img src="${escapeHtml(job.logo.url)}" alt="${escapeHtml(job.company)} logo" loading="lazy" /></span>`;
+        }
+
+        const initials = (job.company || "?")
+          .split(/\s+/)
+          .slice(0, 2)
+          .map((token) => token[0])
+          .join("")
+          .toUpperCase();
+        return `<span class="logo fallback">${initials || "?"}</span>`;
+      }
+
+      function openIcon() {
+        return `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M14 4h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M10 14L20 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M20 14v6h-16v-16h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        `;
+      }
+
+      function renderJobs() {
+        els.jobRows.innerHTML = "";
+
+        if (!state.jobs.length) {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td colspan="8" class="empty">No jobs found for current filters.</td>`;
+          els.jobRows.appendChild(row);
+          return;
+        }
+
+        const fragment = document.createDocumentFragment();
+
+        state.jobs.forEach((job) => {
+          const safeLink = escapeHtml(job.job_link || "");
+          const safeCompany = escapeHtml(job.company || "-");
+          const safeTitle = escapeHtml(job.title || "Untitled");
+          const safeLocation = escapeHtml(job.location || "-");
+          const safePosted = escapeHtml(job.posted_date || "-");
+          const safeSource = escapeHtml(job.scan_target_id || "default");
+
+          const row = document.createElement("tr");
+          if (job.is_starred) row.classList.add("starred");
+
+          row.innerHTML = `
+            <td>
+              <button class="star ${job.is_starred ? "on" : ""}" data-action="toggle-star" data-link="${safeLink}" title="Star job">
+                ${job.is_starred ? "★" : "☆"}
+              </button>
+            </td>
+            <td>${logoCell(job)}</td>
+            <td class="title">${safeTitle}</td>
+            <td>${safeCompany}</td>
+            <td>${safeLocation}</td>
+            <td>${safePosted}</td>
+            <td class="source">${safeSource}</td>
+            <td>
+              <div class="actions">
+                <button class="icon-btn" data-action="exclude-company" data-company="${safeCompany}" title="Exclude company">⊘</button>
+                <button class="icon-btn" data-action="exclude-job" data-link="${safeLink}" title="Exclude this job">✕</button>
+                <a class="open-link" href="${safeLink}" target="_blank" rel="noopener noreferrer" title="Open on LinkedIn">${openIcon()}</a>
+              </div>
+            </td>
+          `;
+          fragment.appendChild(row);
+        });
+
+        els.jobRows.appendChild(fragment);
+      }
+
+      function updateStatusLine() {
+        const nextRunText = state.nextRunAtMs ? formatCountdown(state.nextRunAtMs - Date.now()) : "--";
+        els.statusText.textContent = `Next auto scan: ${nextRunText}`;
+      }
+
+      async function loadStatus() {
+        const payload = await apiFetch("/api/status");
+        state.nextRunAtMs = payload.next_run_at ? new Date(payload.next_run_at).getTime() : null;
+        state.intervalMinutes = payload.scan_interval_minutes || 60;
+
+        if (payload.last_run_error) {
+          els.errorText.textContent = payload.last_run_error;
+        }
+      }
+
+      async function loadState() {
+        state.appState = await apiFetch("/api/state");
+        renderExclusions();
+      }
+
+      async function loadConfig() {
+        state.config = await apiFetch("/api/config");
+        renderConfigEditor();
+      }
+
+      function currentFilterParams() {
+        return {
+          include_older: state.filter === "all",
+          starred_only: state.filter === "starred",
+          search: state.search,
+        };
+      }
+
+      async function loadJobs() {
+        const payload = await apiFetch(apiUrl("/api/jobs", currentFilterParams()));
+        state.jobs = payload.jobs || [];
+        els.updatedText.textContent = `Last updated: ${formatDate(payload.updated_at)} · Showing ${payload.count} jobs`;
+        renderJobs();
+      }
+
+      function renderExclusions() {
+        if (!state.appState) return;
+
+        const companyTags = state.appState.excluded_companies || [];
+        els.excludedCompanies.innerHTML = companyTags.length
+          ? companyTags
+              .map(
+                (company) =>
+                  `<span class="tag">${escapeHtml(company)}<button type="button" data-action="remove-exclusion" data-mode="company" data-value="${escapeHtml(company)}">✕</button></span>`,
+              )
+              .join("")
+          : '<span class="muted">No company exclusions</span>';
+
+        const jobTags = state.appState.excluded_job_links || [];
+        els.excludedJobs.innerHTML = jobTags.length
+          ? jobTags
+              .map(
+                (jobLink) =>
+                  `<span class="tag">${escapeHtml(jobLink)}<button type="button" data-action="remove-exclusion" data-mode="job" data-value="${escapeHtml(jobLink)}">✕</button></span>`,
+              )
+              .join("")
+          : '<span class="muted">No job exclusions</span>';
+      }
+
+      function buildTargetRow(target) {
+        return `
+          <div class="target-row" data-target-id="${escapeHtml(target.id)}">
+            <input type="text" data-field="id" value="${escapeHtml(target.id)}" placeholder="id" />
+            <input type="text" data-field="keywords" value="${escapeHtml(target.keywords)}" placeholder="keywords" />
+            <input type="text" data-field="location" value="${escapeHtml(target.location)}" placeholder="location" />
+            <input type="number" data-field="max_jobs" min="1" max="500" value="${escapeHtml(target.max_jobs)}" />
+            <label class="muted"><input type="checkbox" data-field="enabled" ${target.enabled ? "checked" : ""} /> enabled</label>
+            <button type="button" class="icon-btn" data-action="remove-target">✕</button>
+          </div>
+        `;
+      }
+
+      function renderConfigEditor() {
+        if (!state.config) return;
+
+        els.parallelInput.value = state.config.max_parallel_scans;
+        els.groqEnabledInput.value = String(state.config.groq_refinement_enabled);
+        els.groqExpansionInput.value = state.config.groq_expansions_per_target;
+
+        els.targetRows.innerHTML = state.config.scan_targets.map(buildTargetRow).join("");
+      }
+
+      function collectConfigPayload() {
+        const targetRows = Array.from(els.targetRows.querySelectorAll(".target-row"));
+        const scanTargets = targetRows.map((row, index) => {
+          const id = row.querySelector('[data-field="id"]').value.trim();
+          const keywords = row.querySelector('[data-field="keywords"]').value.trim();
+          const location = row.querySelector('[data-field="location"]').value.trim();
+          const maxJobs = Number(row.querySelector('[data-field="max_jobs"]').value || 100);
+          const enabled = row.querySelector('[data-field="enabled"]').checked;
+
+          return {
+            id: id || `target-${index + 1}`,
+            keywords,
+            location,
+            max_jobs: Number.isFinite(maxJobs) ? maxJobs : 100,
+            enabled,
+          };
+        });
+
+        return {
+          scan_targets: scanTargets,
+          max_parallel_scans: Number(els.parallelInput.value || 1),
+          groq_refinement_enabled: els.groqEnabledInput.value === "true",
+          groq_expansions_per_target: Number(els.groqExpansionInput.value || 0),
+        };
+      }
+
+      async function saveConfig() {
+        const payload = collectConfigPayload();
+        if (!payload.scan_targets.length) {
+          throw new Error("At least one scan target is required");
+        }
+
+        payload.scan_targets.forEach((target) => {
+          if (!target.keywords || !target.location) {
+            throw new Error("Each target needs keywords and location");
+          }
+        });
+
+        state.config = await apiFetch("/api/config", {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
+        renderConfigEditor();
+      }
+
+      async function triggerScan() {
+        els.scanButton.disabled = true;
+        els.scanButton.textContent = "Scanning...";
+        els.errorText.textContent = "";
+
+        try {
+          await apiFetch("/api/scan", { method: "POST" });
+          await loadStatus();
+        } finally {
+          els.scanButton.disabled = false;
+          els.scanButton.textContent = "Run scan";
+        }
+      }
+
+      async function toggleStar(jobLink, starred) {
+        await apiFetch("/api/state/star", {
+          method: "POST",
+          body: JSON.stringify({ job_link: jobLink, starred }),
+        });
+        await loadJobs();
+      }
+
+      async function addExclusion(mode, value) {
+        await apiFetch("/api/state/exclude", {
+          method: "POST",
+          body: JSON.stringify({ mode, value }),
+        });
+        await Promise.all([loadState(), loadJobs()]);
+      }
+
+      async function removeExclusion(mode, value) {
+        await apiFetch("/api/state/unexclude", {
+          method: "POST",
+          body: JSON.stringify({ mode, value }),
+        });
+        await Promise.all([loadState(), loadJobs()]);
+      }
+
+      async function refreshAll() {
+        await Promise.all([loadState(), loadConfig(), loadJobs(), loadStatus()]);
+        updateStatusLine();
+      }
+
+      els.searchInput.addEventListener(
+        "input",
+        debounce(async (event) => {
+          state.search = event.target.value.trim();
+          await loadJobs();
+        }),
+      );
+
+      els.filterChips.addEventListener("click", async (event) => {
+        const chip = event.target.closest("button[data-filter]");
+        if (!chip) return;
+
+        state.filter = chip.dataset.filter;
+        Array.from(els.filterChips.querySelectorAll(".chip")).forEach((item) => item.classList.remove("active"));
+        chip.classList.add("active");
+        await loadJobs();
+      });
+
+      els.scanButton.addEventListener("click", async () => {
+        try {
+          await triggerScan();
+        } catch (error) {
+          els.errorText.textContent = error.message;
+        }
+      });
+
+      els.configButton.addEventListener("click", () => {
+        state.configDrawerOpen = !state.configDrawerOpen;
+        els.configDrawer.classList.toggle("open", state.configDrawerOpen);
+        els.configDrawer.setAttribute("aria-hidden", String(!state.configDrawerOpen));
+      });
+
+      els.addTargetButton.addEventListener("click", () => {
+        const nextIndex = els.targetRows.querySelectorAll(".target-row").length + 1;
+        els.targetRows.insertAdjacentHTML(
+          "beforeend",
+          buildTargetRow({
+            id: `target-${nextIndex}`,
+            keywords: "",
+            location: "",
+            max_jobs: 100,
+            enabled: true,
+          }),
+        );
+      });
+
+      els.saveConfigButton.addEventListener("click", async () => {
+        try {
+          await saveConfig();
+          els.errorText.textContent = "";
+        } catch (error) {
+          els.errorText.textContent = error.message;
+        }
+      });
+
+      els.targetRows.addEventListener("click", (event) => {
+        const action = event.target.closest("[data-action]");
+        if (!action) return;
+        if (action.dataset.action === "remove-target") {
+          action.closest(".target-row")?.remove();
+        }
+      });
+
+      els.jobRows.addEventListener("click", async (event) => {
+        const actionEl = event.target.closest("[data-action]");
+        if (!actionEl) return;
+
+        const action = actionEl.dataset.action;
+
+        try {
+          if (action === "toggle-star") {
+            const jobLink = actionEl.dataset.link;
+            const isStarred = actionEl.classList.contains("on");
+            await toggleStar(jobLink, !isStarred);
+          }
+
+          if (action === "exclude-company") {
+            const company = actionEl.dataset.company;
+            await addExclusion("company", company);
+          }
+
+          if (action === "exclude-job") {
+            const jobLink = actionEl.dataset.link;
+            await addExclusion("job", jobLink);
+          }
+        } catch (error) {
+          els.errorText.textContent = error.message;
+        }
+      });
+
+      els.excludedCompanies.addEventListener("click", async (event) => {
+        const button = event.target.closest('[data-action="remove-exclusion"]');
+        if (!button) return;
+        try {
+          await removeExclusion("company", button.dataset.value);
+        } catch (error) {
+          els.errorText.textContent = error.message;
+        }
+      });
+
+      els.excludedJobs.addEventListener("click", async (event) => {
+        const button = event.target.closest('[data-action="remove-exclusion"]');
+        if (!button) return;
+        try {
+          await removeExclusion("job", button.dataset.value);
+        } catch (error) {
+          els.errorText.textContent = error.message;
+        }
+      });
+
+      els.addCompanyExclusionButton.addEventListener("click", async () => {
+        const value = els.excludeCompanyInput.value.trim();
+        if (!value) return;
+        try {
+          await addExclusion("company", value);
+          els.excludeCompanyInput.value = "";
+        } catch (error) {
+          els.errorText.textContent = error.message;
+        }
+      });
+
+      els.addJobExclusionButton.addEventListener("click", async () => {
+        const value = els.excludeJobInput.value.trim();
+        if (!value) return;
+        try {
+          await addExclusion("job", value);
+          els.excludeJobInput.value = "";
+        } catch (error) {
+          els.errorText.textContent = error.message;
+        }
+      });
+
+      async function bootstrap() {
+        try {
+          await refreshAll();
+          setInterval(async () => {
+            await loadStatus();
+            updateStatusLine();
+          }, 1000);
+          setInterval(async () => {
+            await loadJobs();
+          }, 20000);
+        } catch (error) {
+          els.errorText.textContent = error.message;
+          els.statusText.textContent = "Failed to load";
+        }
+      }
+
+      bootstrap();
+    </script>
+  </body>
+</html>

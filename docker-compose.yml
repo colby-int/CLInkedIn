@@ -1,0 +1,37 @@
+services:
+  linkedin-job-app:
+    build:
+      context: .
+    container_name: linkedin-job-app
+    environment:
+      APP_PORT: "8765"
+      SCAN_INTERVAL_MINUTES: "60"
+      SCAN_ON_STARTUP: "true"
+      SCAN_KEYWORDS: "music"
+      SCAN_LOCATION: "Australia"
+      SCAN_MAX_JOBS: "100"
+      JOBS_JSON_PATH: "/app/data/linkedin_jobs.json"
+      STATE_JSON_PATH: "/app/data/app_state.json"
+      SCAN_CONFIG_PATH: "/app/data/scan_config.json"
+      LOGO_EXTERNAL_SEARCH_ENABLED: "true"
+      GROQ_API_KEY: "${GROQ_API_KEY:-}"
+      GROQ_MODEL: "llama-3.3-70b-versatile"
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  linkedin-job-cli:
+    build:
+      context: .
+    depends_on:
+      - linkedin-job-app
+    environment:
+      CLI_API_BASE_URL: "http://linkedin-job-app:8765"
+      CLI_REFRESH_SECONDS: "7"
+    command: ["python", "job_scanner_cli.py"]
+    stdin_open: true
+    tty: true
+    profiles:
+      - cli
