@@ -13,11 +13,11 @@ Includes hourly auto-scanning, and a unified feed from parallel keyword/location
 ## Screenshots
 
 <p align="center">
-  <img src="./docs/web.png" alt="Web Interface" width="720" />
+  <img src="./docs/screenshots/web.png" alt="Web Interface" width="720" />
 </p>
 
 <p align="center">
-  <img src="./docs/term.png" alt="Terminal Interface" width="720" />
+  <img src="./docs/screenshots/term.png" alt="Terminal Interface" width="720" />
 </p>
 
 ## Features
