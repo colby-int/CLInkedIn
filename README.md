@@ -1,14 +1,24 @@
-# CLInked in
+# CLInkedIn
 
 <p align="center">
   <img src="./logo-full.png" alt="CLInked in logo" width="720" />
 </p>
 
-CLInked in is a self-hosted LinkedIn jobs scanner with two frontends backed by the same API:
+CLInkedIn is a self-hosted LinkedIn jobs scanner with two frontends backed by the same API:
 - a web dashboard,
 - a colorful terminal dashboard (TUI/CLI).
+- 
+Includes hourly auto-scanning, and a unified feed from parallel keyword/location targets.
 
-It is designed for home-server deployment with Docker Compose, hourly auto-scanning, and a unified feed from parallel keyword/location targets.
+## Screenshots
+
+<p align="center">
+  <img src="./docs/web.png" alt="Web Interface" width="720" />
+</p>
+
+<p align="center">
+  <img src="./docs/term.png" alt="Terminal Interface" width="720" />
+</p>
 
 ## Features
 
@@ -31,7 +41,7 @@ It is designed for home-server deployment with Docker Compose, hourly auto-scann
 - Unified deduped feed across all enabled scan targets.
 
 ### Intelligence and enrichment
-- Optional Groq-powered keyword expansion/refinement.
+- Optional Groq-powered keyword expansion/refinement (free API key from their site)
 - Web logo matching/search pipeline with scoring by source, filename, filetype, and domain/name similarity.
 
 ### Interfaces
