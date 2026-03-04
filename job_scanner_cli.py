@@ -10,6 +10,8 @@ from textual import work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
+from textual.css.query import NoMatches
+from textual.events import Key
 from textual.screen import ModalScreen
 from textual.widgets import DataTable, Footer, Header, Input, Static, TextArea
 
@@ -51,7 +53,9 @@ class ConfigEditorScreen(ModalScreen[dict | None]):
         pretty = json.dumps(self._config_payload, indent=2, ensure_ascii=False)
         with Vertical(id="config-modal"):
             yield Static("Config Editor (Ctrl+S save, Esc cancel)", id="config-title")
-            yield TextArea.code_editor(pretty, language="json", id="config-text")
+            # Use plain TextArea mode to avoid code-editor gutter rendering crashes
+            # on narrow terminals in textual 0.77.x.
+            yield TextArea(pretty, language="json", id="config-text")
             yield Static("", id="config-error")
 
     def action_cancel(self) -> None:
@@ -159,6 +163,18 @@ class JobScannerCLI(App):
         self.search = event.value.strip()
         await self._refresh_jobs(force_table=True)
 
+    async def on_key(self, event: Key) -> None:
+        if event.key != "escape":
+            return
+        try:
+            search_input = self.query_one("#search-input", Input)
+        except NoMatches:
+            return
+        if search_input.has_focus:
+            event.stop()
+            event.prevent_default()
+            await self.action_escape_search()
+
     @work(exclusive=True)
     async def _refresh_background(self) -> None:
         await self._refresh_all(force_table=False)
@@ -207,7 +223,10 @@ class JobScannerCLI(App):
         self._render_status_line()
 
     def _render_table(self) -> None:
-        table = self.query_one("#jobs-table", DataTable)
+        try:
+            table = self.query_one("#jobs-table", DataTable)
+        except NoMatches:
+            return
         prev_cursor = table.cursor_row
 
         table.clear()
@@ -229,7 +248,10 @@ class JobScannerCLI(App):
         table.cursor_coordinate = (max(row, 0), 0)
 
     def _selected_job(self) -> dict | None:
-        table = self.query_one("#jobs-table", DataTable)
+        try:
+            table = self.query_one("#jobs-table", DataTable)
+        except NoMatches:
+            return None
         row = table.cursor_row
         if row < 0 or row >= len(self.jobs):
             return None
@@ -261,7 +283,10 @@ class JobScannerCLI(App):
         )
 
     def _render_status_line(self) -> None:
-        line = self.query_one("#status-line", Static)
+        try:
+            line = self.query_one("#status-line", Static)
+        except NoMatches:
+            return
         text = self._status_text()
         if self.error_message:
             text = f"{text}  Error: {self.error_message}"
@@ -285,7 +310,18 @@ class JobScannerCLI(App):
         await self._refresh_jobs(force_table=True)
 
     async def action_focus_search(self) -> None:
-        self.query_one("#search-input", Input).focus()
+        try:
+            self.query_one("#search-input", Input).focus()
+        except NoMatches:
+            return
+
+    async def action_escape_search(self) -> None:
+        try:
+            search_input = self.query_one("#search-input", Input)
+        except NoMatches:
+            return
+        if search_input.has_focus:
+            self.query_one("#jobs-table", DataTable).focus()
 
     async def action_toggle_star(self) -> None:
         job = self._selected_job()
@@ -347,10 +383,16 @@ class JobScannerCLI(App):
             self._render_status_line()
             return
 
-        payload = await self.push_screen_wait(ConfigEditorScreen(config))
+        self.push_screen(ConfigEditorScreen(config), self._on_config_editor_dismissed)
+
+    def _on_config_editor_dismissed(self, payload: dict | None) -> None:
         if payload is None:
             return
 
+        self._save_config_payload(payload)
+
+    @work
+    async def _save_config_payload(self, payload: dict) -> None:
         try:
             self.client.save_config(payload)
             self.error_message = ""

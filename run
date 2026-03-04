@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+VENV_PY="$ROOT_DIR/.venv/bin/python"
+CLI_SCRIPT="$ROOT_DIR/job_scanner_cli.py"
+API_URL="${CLI_API_BASE_URL:-http://127.0.0.1:8765}"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ./run cli [extra args]
+
+Environment overrides:
+  CLI_API_BASE_URL   API URL for CLI (default: http://127.0.0.1:8765)
+EOF
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 1
+fi
+
+cmd="$1"
+shift
+
+case "$cmd" in
+  cli)
+    if [[ ! -x "$VENV_PY" ]]; then
+      echo "Missing virtualenv python at $VENV_PY" >&2
+      echo "Create/install deps first, e.g.:" >&2
+      echo "  python3 -m venv .venv && ./.venv/bin/pip install -r requirements-dev.txt" >&2
+      exit 1
+    fi
+    exec "$VENV_PY" "$CLI_SCRIPT" --api-base-url "$API_URL" "$@"
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $cmd" >&2
+    usage
+    exit 1
+    ;;
+esac

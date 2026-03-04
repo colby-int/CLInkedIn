@@ -3,7 +3,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from app.main import create_app
+from app.main import _resolve_settings, create_app
 
 
 def _write_json(path: Path, data):
@@ -130,3 +130,38 @@ def test_config_can_be_updated(tmp_path: Path):
     assert len(config["scan_targets"]) == 2
     assert config["max_parallel_scans"] == 3
     assert config["groq_refinement_enabled"] is True
+
+
+def test_config_route_recovers_from_invalid_config_file(tmp_path: Path):
+    jobs_file = tmp_path / "linkedin_jobs.json"
+    state_file = tmp_path / "app_state.json"
+    config_file = tmp_path / "scan_config.json"
+
+    _write_json(jobs_file, [])
+    _write_json(state_file, {"starred_job_links": [], "excluded_job_links": [], "excluded_companies": []})
+    config_file.write_text("{not-json", encoding="utf-8")
+
+    app = create_app(
+        jobs_json_path=jobs_file,
+        state_json_path=state_file,
+        config_json_path=config_file,
+        start_scheduler=False,
+    )
+    client = TestClient(app)
+
+    response = client.get("/api/config")
+    assert response.status_code == 200
+    payload = response.json()
+
+    assert payload["scan_targets"]
+    assert payload["scan_targets"][0]["id"] == "default"
+
+
+def test_resolve_settings_handles_invalid_env_ints(monkeypatch):
+    monkeypatch.setenv("SCAN_MAX_JOBS", "not-a-number")
+    monkeypatch.setenv("SCAN_INTERVAL_MINUTES", "bad")
+
+    settings = _resolve_settings()
+
+    assert settings.default_max_jobs == 100
+    assert settings.scan_interval_minutes == 60

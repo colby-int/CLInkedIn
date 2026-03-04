@@ -89,13 +89,14 @@ def _default_state_payload() -> dict[str, list[str]]:
 
 
 def _default_config_payload(settings: AppSettings) -> dict[str, Any]:
+    default_max_jobs = max(1, min(500, int(settings.default_max_jobs)))
     return {
         "scan_targets": [
             {
                 "id": "default",
                 "keywords": settings.default_keywords,
                 "location": settings.default_location,
-                "max_jobs": settings.default_max_jobs,
+                "max_jobs": default_max_jobs,
                 "enabled": True,
             }
         ],
@@ -103,6 +104,19 @@ def _default_config_payload(settings: AppSettings) -> dict[str, Any]:
         "groq_refinement_enabled": True,
         "groq_expansions_per_target": 3,
     }
+
+
+def _env_int(name: str, default: int, *, min_value: int | None = None, max_value: int | None = None) -> int:
+    try:
+        value = int(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        value = default
+
+    if min_value is not None:
+        value = max(min_value, value)
+    if max_value is not None:
+        value = min(max_value, value)
+    return value
 
 
 def _read_jobs_file(path: Path) -> list[dict[str, Any]]:
@@ -127,11 +141,11 @@ def _resolve_settings(
     return AppSettings(
         default_keywords=os.getenv("SCAN_KEYWORDS", "music"),
         default_location=os.getenv("SCAN_LOCATION", "Australia"),
-        default_max_jobs=int(os.getenv("SCAN_MAX_JOBS", "100")),
+        default_max_jobs=_env_int("SCAN_MAX_JOBS", 100, min_value=1, max_value=500),
         jobs_json_path=jobs_json_path or Path(os.getenv("JOBS_JSON_PATH", "data/linkedin_jobs.json")),
         state_json_path=state_json_path or Path(os.getenv("STATE_JSON_PATH", "data/app_state.json")),
         config_json_path=config_json_path or Path(os.getenv("SCAN_CONFIG_PATH", "data/scan_config.json")),
-        scan_interval_minutes=int(os.getenv("SCAN_INTERVAL_MINUTES", "60")),
+        scan_interval_minutes=_env_int("SCAN_INTERVAL_MINUTES", 60, min_value=1),
         scan_on_startup=os.getenv("SCAN_ON_STARTUP", "true").lower() == "true",
         logo_external_search_enabled=os.getenv("LOGO_EXTERNAL_SEARCH_ENABLED", "true").lower() == "true",
         groq_api_key=os.getenv("GROQ_API_KEY", "").strip(),
